@@ -24,21 +24,25 @@ const RecieveWeatherData =async(req,res)=>{
   }
 }
 
-const GetWeatherData = async (req,res)=>{
-
+const GetWeatherData = async (req, res) => {
   try {
-      
-    const weatherDataList = await WeatherData.find()
+    const latestWeatherData = await WeatherData.find()
+      .sort({ _id: -1 }) 
+      .limit(1) 
       .populate('temperatureHumidityData')
       .populate('windspeed')
       .populate('windData');
 
-    res.status(200).json({ data: weatherDataList });
+    if (latestWeatherData.length === 0) {
+      return res.status(404).json({ error: 'Aucune donnée trouvée' });
+    }
+
+    res.status(200).json({ data: latestWeatherData[0] });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erreur lors de la récupération des données' });
   }
-}
+};
 module.exports ={
     RecieveWeatherData ,
     GetWeatherData
